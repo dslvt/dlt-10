@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset='utf-8'>
+        <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+        <title>Web 3 Demo</title>
+        <meta name='viewport' content='width=device-width, initial-scale=1'>
+
+        <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+    </head>
+    <body>
+        Web 3 Demo
+        <br >
+        <input type="text" id="number1"/>
+        <input type="text" id="number2"/>
+
+        <button onclick="transfer();">Send ZaiCoin</button>
+
+        Status: <span id="status">Loading...</span>
+
+        <script  type="text/javascript">
+            async function loadWeb3() {
+                if (window.ethereum) {
+                    window.web3 = new Web3(window.ethereum);
+                    window.ethereum.enable();
+                }
+            }
+
+            async function loadContract() {
+                return await new window.web3.eth.Contract([
+                    {
+                        "inputs": [
+                            {
+                                "internalType": "address",
+                                "name": "receiver",
+                                "type": "address"
+                            },
+                            {
+                                "internalType": "uint",
+                                "name": "numTokens",
+                                "type": "uint"
+                            },
+                        ],
+                        "name": "transfer",
+                        "outputs": [
+                            {
+                                "internalType": "bool",
+                                "name": "",
+                                "type": "bool"
+                            }
+                        ],
+                        "stateMutability": "view",
+                        "type": "function"
+                    },
+                ], '0x9e9196Cd4e0Df5C85Fc3fCfBF7A1f29241d86e6B');
+            }
+
+            async function getCurrentAccount() {
+                const accounts = await window.web3.eth.getAccounts();
+                return accounts[0];
+            }
+
+            function getValues() {
+                return [Number(document.getElementById('number1').value), Number(document.getElementById('number2').value)]
+            }
+
+            async function transfer() {
+                const account = await getCurrentAccount();
+                var [val1, val2] = getValues()
+                updateStatus(`sending of ${val1} and ${val2}...`);
+                const status = await window.contract.methods.transfer(val1, val2).send({ from: account });
+                updateStatus(`res: ${status}`);
+            }
+
+            async function load() {
+                await loadWeb3();
+                window.contract = await loadContract();
+                updateStatus('Ready!');
+            }
+
+            function updateStatus(status) {
+                const statusEl = document.getElementById('status');
+                statusEl.innerHTML = status;
+                console.log(status);
+            }
+
+            load();
+        </script>
+    </body>
+</html>
